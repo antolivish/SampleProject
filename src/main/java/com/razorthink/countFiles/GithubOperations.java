@@ -6,6 +6,7 @@ import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.RepositoryService;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ public class GithubOperations {
     }
 
     //Getting branches of specific repository
-    public void gitRemoteBranches(RepositoryService service, String localrepo, String REMOTE_URL) throws Exception {
+    public void gitRemoteBranches(RepositoryService service, String localrepo, String REMOTE_URL,String Username,String Password) throws Exception {
         System.out.println("\nRemote Branches");
         System.out.println("------------------------");
         for (Repository repo : service.getRepositories()) {
@@ -51,7 +52,9 @@ public class GithubOperations {
                         .setHeads(true)
                         .setTags(true)
                         .setRemote(REMOTE_URL)
+                        .setCredentialsProvider(new UsernamePasswordCredentialsProvider(Username,Password))
                         .call();
+
                 for (Ref ref : refs)
                     System.out.println(ref.getName());
             }
@@ -59,6 +62,13 @@ public class GithubOperations {
     }
 
     //Listing Files
+
+    /**
+     *
+     * @param localRepoPath
+     * @return
+     * @throws Exception
+     */
     public List<String> gitListingFiles(String localRepoPath) throws Exception {
         int index = 1;
         System.out.println("\nFile path list");
@@ -66,7 +76,7 @@ public class GithubOperations {
         int count = 0;
         List<String> fileList = new ArrayList<String>();
         File dir = new File(localRepoPath);
-        String[] extensions = new String[]{"txt", "jsp", "java"};
+        String[] extensions = new String[]{"txt", "jsp", "java","py"};
         List<File> files = (List<File>) FileUtils.listFiles(dir, extensions, true);
         for (File file : files) {
             System.out.println("Index : "+index+" file: " + file.getCanonicalPath());
@@ -86,7 +96,7 @@ public class GithubOperations {
     }
 
     //Cloning to local repository
-    public void gitCloning(String Remote_URL, String branch, String localRepoPath) throws Exception {
+    public void gitCloning(String Remote_URL, String branch, String localRepoPath,String Username,String Password) throws Exception {
         File dir = new File(localRepoPath);
         if (dir.exists()) {
             FileUtils.forceDelete(dir);
@@ -95,6 +105,7 @@ public class GithubOperations {
                 .setURI(Remote_URL)
                 .setDirectory(dir)
                 .setBranch(branch)
+                .setCredentialsProvider(new UsernamePasswordCredentialsProvider(Username,Password))
                 .call();
     }
 

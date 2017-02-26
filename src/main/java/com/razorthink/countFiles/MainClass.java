@@ -27,9 +27,9 @@ public class MainClass {
         String localrepopath = "/home/antolivish/githubrepo/"+remoteRepo+"/";
         String REMOTE_URL = (githubOperations.gitRemote_URL(service,remoteRepo)) + ".git";
 
-        githubOperations.gitRemoteBranches(service,remoteRepo,REMOTE_URL);
+        githubOperations.gitRemoteBranches(service,remoteRepo,REMOTE_URL,Username,Password);
         String branch = githubOperations.branch();
-        githubOperations.gitCloning(REMOTE_URL,branch,localrepopath);
+        githubOperations.gitCloning(REMOTE_URL,branch,localrepopath,Username,Password);
 
 
         FileList = githubOperations.gitListingFiles(localrepopath);
