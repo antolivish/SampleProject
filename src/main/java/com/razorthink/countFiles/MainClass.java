@@ -2,39 +2,40 @@ package com.razorthink.countFiles;
 
 
 import org.eclipse.egit.github.core.client.GitHubClient;
-
 import org.eclipse.egit.github.core.service.RepositoryService;
-
 import java.util.ArrayList;
 import java.util.List;
-
+/**
+ * Created by antolivish on 25/2/17.
+ */
 
 public class MainClass {
 
-
     public static void main(String[] args) throws Exception {
 
-        String Username = "antolivish";
-        String pwd = "antoa30303";
-        String localrepo = "testRepo";
-        String path = "/home/antolivish/GithubRepo/testRepo/Scene 7.txt";
-        String branch = "master";
         List<String> FileList = new ArrayList<String>();
 
-        //Passing credentials
-        GitHubClient client = new GitHubClient();
-        client.setCredentials(Username, pwd);
-        RepositoryService service = new RepositoryService(client);
+        System.out.println("\nGithub Credentials");
         GithubOperations githubOperations = new GithubOperations();
-        githubOperations.gitCloning(Username,localrepo,branch);
-        githubOperations.gitRemoteRepository(service);
-        githubOperations.gitRemoteBranches(service,localrepo,Username);
-        FileList = githubOperations.gitListingFiles(Username,localrepo);
-//        githubOperations.gitFetchContent(path);
+        String Username = githubOperations.getUsername();
+        String Password = githubOperations.getPassword();
 
-        for(String temp : FileList){
-            System.out.println(temp);
-        }
+        GitHubClient client = githubOperations.gitCredentials(Username,Password);
+        RepositoryService service = new RepositoryService(client);
+        githubOperations.gitRemoteRepository(service);
+        String remoteRepo = githubOperations.gitRemoteRepoSelect();
+        String localrepopath = "/home/antolivish/githubrepo/"+remoteRepo+"/";
+        String REMOTE_URL = (githubOperations.gitRemote_URL(service,remoteRepo)) + ".git";
+
+        githubOperations.gitRemoteBranches(service,remoteRepo,REMOTE_URL);
+        String branch = githubOperations.branch();
+        githubOperations.gitCloning(REMOTE_URL,branch,localrepopath);
+
+
+        FileList = githubOperations.gitListingFiles(localrepopath);
+        int indexNum = githubOperations.getIndexOfFile();
+        githubOperations.gitFetchContent(FileList.get(indexNum-1));
+
     }
 }
 

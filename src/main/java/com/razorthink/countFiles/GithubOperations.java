@@ -2,6 +2,7 @@ package com.razorthink.countFiles;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.egit.github.core.Repository;
+import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.RepositoryService;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Ref;
@@ -10,6 +11,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Scanner;
 
 /**
  * Created by antolivish on 25/2/17.
@@ -18,20 +20,33 @@ public class GithubOperations {
     ReadFile readFile = new ReadFile();
 
     //Getting remote repositories
-    public void gitRemoteRepository(RepositoryService service) throws Exception{
-        System.out.println("Remote Repository");
+    public void gitRemoteRepository(RepositoryService service) throws Exception {
+        System.out.println("\nRemote Repository");
         System.out.println("-----------------------");
-        for (Repository repo : service.getRepositories())
+        for (Repository repo : service.getRepositories()){
             System.out.println(repo.getName());
+        }
+    }
+
+    public String gitRemote_URL(RepositoryService service,String remoteRepo) throws Exception{
+        String Remote_URL = "";
+        System.out.println(remoteRepo);
+        for (Repository repo : service.getRepositories()) {
+            if (repo.getName().equals(remoteRepo)) {
+                String URL = repo.getHtmlUrl();
+                return URL;
+            }
+        }
+        return Remote_URL;
     }
 
     //Getting branches of specific repository
-    public void gitRemoteBranches(RepositoryService service,String localrepo,String Username) throws Exception{
+    public void gitRemoteBranches(RepositoryService service, String localrepo, String REMOTE_URL) throws Exception {
         System.out.println("\nRemote Branches");
         System.out.println("------------------------");
-        for (Repository repo : service.getRepositories()){
+        for (Repository repo : service.getRepositories()) {
             if (repo.getName().equals(localrepo)) {
-                String REMOTE_URL = "https://github.com/" + Username +"/" + repo.getName() + ".git";
+//                String REMOTE_URL = "https://github.com/" + Username + "/" + repo.getName() + ".git";
                 Collection<Ref> refs = Git.lsRemoteRepository()
                         .setHeads(true)
                         .setTags(true)
@@ -44,25 +59,26 @@ public class GithubOperations {
     }
 
     //Listing Files
-    public List<String> gitListingFiles(String Username,String localrepo) throws Exception{
+    public List<String> gitListingFiles(String localRepoPath) throws Exception {
+        int index = 1;
         System.out.println("\nFile path list");
         System.out.println("------------------------");
         int count = 0;
         List<String> fileList = new ArrayList<String>();
-        File dir = new File("/home/"+Username+"/GithubRepo/"+localrepo+"/");
-        String[] extensions = new String[] { "txt", "jsp", "java" };
+        File dir = new File(localRepoPath);
+        String[] extensions = new String[]{"txt", "jsp", "java"};
         List<File> files = (List<File>) FileUtils.listFiles(dir, extensions, true);
         for (File file : files) {
-            System.out.println("file: " + file.getCanonicalPath());
+            System.out.println("Index : "+index+" file: " + file.getCanonicalPath());
             fileList.add(file.getCanonicalPath());
-            count++;
+            count++;index++;
         }
         System.out.println("\nCount :" + count);
         return fileList;
     }
 
     //Fetching File Content
-    public void gitFetchContent(String path) throws Exception{
+    public void gitFetchContent(String path) throws Exception {
         System.out.println("\nFile Content");
         System.out.println("------------------------");
         String FetchFile = readFile.readFile(path);
@@ -70,15 +86,69 @@ public class GithubOperations {
     }
 
     //Cloning to local repository
-    public void gitCloning(String Username,String localrepo,String branch) throws Exception{
-        File dir = new File("/home/"+Username+"/GithubRepo/"+localrepo+"/");
-        if(dir.exists()){
+    public void gitCloning(String Remote_URL, String branch, String localRepoPath) throws Exception {
+        File dir = new File(localRepoPath);
+        if (dir.exists()) {
             FileUtils.forceDelete(dir);
         }
         Git git = Git.cloneRepository()
-                .setURI( "https://github.com/antolivish/"+localrepo+".git" )
-                .setDirectory( dir )
+                .setURI(Remote_URL)
+                .setDirectory(dir)
                 .setBranch(branch)
                 .call();
     }
+
+    //get Github Username
+    public String getUsername() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("\nUsername : ");
+        final String Username = scanner.nextLine();
+        return Username;
+    }
+
+    //get Github password
+    public String getPassword() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("\nPassword : ");
+        final String Password = scanner.nextLine();
+        return Password;
+    }
+
+    //Github Credentials
+    public GitHubClient gitCredentials(String Username, String Password) {
+        //Passing credentials
+        GitHubClient client = new GitHubClient();
+        client.setCredentials(Username, Password);
+        return client;
+    }
+
+    //Get remote branch from User
+    public String branch() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("\nBranch : ");
+        final String Branch = scanner.nextLine();
+        return Branch;
+    }
+
+    //Select Remote Repo by user
+    public String gitRemoteRepoSelect() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("\nSelect Remote Repository : ");
+        final String remoteRepo = scanner.nextLine();
+        return remoteRepo;
+    }
+
+    public int getIndexOfFile(){
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("\nEnter Index of file to read : ");
+        final int Index = scanner.nextInt();
+        return Index;
+    }
+
+//    public String gitRemoteRepoPath() {
+//        String Username = getUsername();
+//        String path = "https://github.com/" + Username + "/"++ ".git";
+//        return path;
+//    }
+
 }
