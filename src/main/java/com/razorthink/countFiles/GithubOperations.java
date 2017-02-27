@@ -155,11 +155,4 @@ public class GithubOperations {
         final int Index = scanner.nextInt();
         return Index;
     }
-
-//    public String gitRemoteRepoPath() {
-//        String Username = getUsername();
-//        String path = "https://github.com/" + Username + "/"++ ".git";
-//        return path;
-//    }
-
 }
